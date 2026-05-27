@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoHabitat · Almacén Mantenimiento</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --verde-oscuro: #1e3d2f;
+  --verde-medio: #2d5a3d;
+  --verde-vivo: #3a7d44;
+  --verde-claro: #5a9e68;
+  --verde-suave: #a8d5b0;
+  --verde-palo: #d4ecd9;
+  --acento: #6dbf74;
+  --tierra: #8b6914;
+  --tierra-claro: #d4a843;
+  --naranja: #e07b39;
+  --rojo: #c0392b;
+  --blanco: #f8faf8;
+  --gris-claro: #eef2ee;
+  --gris: #9aaa9a;
+  --texto: #1a2e1e;
+  --sombra: 0 2px 12px rgba(30,61,47,0.15);
+  --sombra-grande: 0 8px 32px rgba(30,61,47,0.18);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--gris-claro);
+  color: var(--texto);
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  background: var(--verde-oscuro);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-area img {
+  height: 40px;
+  filter: brightness(0) invert(1);
+}
+
+.logo-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--blanco);
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+.logo-title span {
+  font-weight: 300;
+  font-size: 13px;
+  display: block;
+  color: var(--verde-suave);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--verde-suave);
+}
+.sync-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--acento);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* NAV TABS */
+.nav-tabs {
+  background: var(--verde-medio);
+  display: flex;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--verde-suave);
+  background: none;
+  border: none;
+  padding: 14px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tab-btn:hover { color: var(--blanco); }
+.tab-btn.active {
+  color: var(--acento);
+  border-bottom-color: var(--acento);
+}
+
+/* MAIN CONTENT */
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* SECTION */
+.section { display: none; }
+.section.active { display: block; }
+
+/* PAGE HEADER */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--verde-oscuro);
+  letter-spacing: -0.5px;
+}
+.page-title span {
+  color: var(--verde-claro);
+}
+
+/* CARDS */
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+
+.card-header {
+  background: var(--verde-oscuro);
+  color: white;
+  padding: 16px 20px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* STATS ROW */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--sombra);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 4px solid var(--verde-claro);
+}
+.stat-card.naranja { border-left-color: var(--naranja); }
+.stat-card.rojo { border-left-color: var(--rojo); }
+.stat-card.tierra { border-left-color: var(--tierra-claro); }
+
+.stat-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--verde-oscuro);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--gris);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* TOOLBAR */
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 240px;
+  position: relative;
+}
+.search-box input {
+  width: 100%;
+  padding: 10px 16px 10px 40px;
+  border: 2px solid var(--verde-palo);
+  border-radius: 8px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  background: white;
+  color: var(--texto);
+  transition: border-color 0.2s;
+}
+.search-box input:focus {
+  outline: none;
+  border-color: var(--verde-claro);
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gris);
+  font-size: 16px;
+}
+
+select {
+  padding: 10px 14px;
+  border: 2px solid var(--verde-palo);
+  border-radius: 8px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  background: white;
+  color: var(--texto);
+  cursor: pointer;
+}
+select:focus { outline: none; border-color: var(--verde-claro); }
+
+/* BUTTONS */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--verde-vivo);
+  color: white;
+}
+.btn-primary:hover { background: var(--verde-oscuro); transform: translateY(-1px); }
+
+.btn-secondary {
+  background: white;
+  color: var(--verde-vivo);
+  border: 2px solid var(--verde-vivo);
+}
+.btn-secondary:hover { background: var(--verde-palo); }
+
+.btn-danger {
+  background: var(--rojo);
+  color: white;
+}
+.btn-danger:hover { background: #a93226; }
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-naranja {
+  background: var(--naranja);
+  color: white;
+}
+.btn-naranja:hover { background: #c0692d; }
+
+/* TABLE */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+thead {
+  background: var(--verde-palo);
+}
+th {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--verde-oscuro);
+  padding: 12px 16px;
+  text-align: left;
+  white-space: nowrap;
+}
+td {
+  padding: 11px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--gris-claro);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--verde-palo); }
+
+/* BADGES */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.badge-verde { background: #d4f0d9; color: #1d6b30; }
+.badge-rojo { background: #fde8e8; color: #c0392b; }
+.badge-naranja { background: #fef0e3; color: #c0692d; }
+.badge-gris { background: #eee; color: #666; }
+.badge-azul { background: #e3ecff; color: #2563eb; }
+
+/* NUM BADGE */
+.num-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--verde-oscuro);
+  color: white;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+}
+.num-badge.desbro { background: #2d5a3d; }
+.num-badge.moto { background: #5a3a2d; }
+.num-badge.herra { background: #2d3a5a; }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open {
+  display: flex;
+}
+.modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--sombra-grande);
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.modal-header {
+  background: var(--verde-oscuro);
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 16px 16px 0 0;
+}
+.modal-header h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.modal-close:hover { opacity: 1; }
+.modal-body { padding: 24px; }
+
+/* FORM */
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--verde-oscuro);
+  margin-bottom: 6px;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--verde-palo);
+  border-radius: 8px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  color: var(--texto);
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: var(--verde-claro);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  background: var(--gris-claro);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-radius: 0 0 16px 16px;
+}
+
+/* MAINT CHECKBOXES */
+.maint-section {
+  background: var(--verde-palo);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.maint-section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--verde-oscuro);
+  margin-bottom: 10px;
+}
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+.check-item input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--verde-vivo);
+  cursor: pointer;
+}
+
+/* ALMACEN TOGGLE */
+.almacen-toggle {
+  display: flex;
+  background: white;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+  border: 2px solid var(--verde-palo);
+}
+.almacen-btn {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: none;
+  color: var(--gris);
+}
+.almacen-btn.active {
+  background: var(--verde-oscuro);
+  color: white;
+}
+
+/* TOAST */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  background: var(--verde-oscuro);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--sombra-grande);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.3s ease;
+  max-width: 340px;
+}
+.toast.error { background: var(--rojo); }
+.toast.warning { background: var(--naranja); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* MANTENIMIENTO LOG */
+.maint-log-entry {
+  background: white;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-left: 4px solid var(--verde-claro);
+  box-shadow: var(--sombra);
+}
+.maint-log-entry.diario { border-left-color: var(--verde-claro); }
+.maint-log-entry.semanal { border-left-color: var(--tierra-claro); }
+.maint-log-entry.mensual { border-left-color: var(--naranja); }
+.maint-log-entry.uso { border-left-color: #5b7cf7; }
+
+.maint-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.maint-log-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+.maint-log-date {
+  font-size: 12px;
+  color: var(--gris);
+}
+.maint-log-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.maint-check-tag {
+  background: var(--verde-palo);
+  color: var(--verde-oscuro);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+.page-btn {
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--verde-palo);
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--verde-oscuro);
+  transition: all 0.2s;
+}
+.page-btn:hover, .page-btn.active { background: var(--verde-oscuro); color: white; border-color: var(--verde-oscuro); }
+
+/* CONFIG SECTION */
+.config-box {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--sombra);
+  margin-bottom: 20px;
+}
+.config-box h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--verde-oscuro);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--verde-palo);
+}
+
+/* Indicador stock */
+.stock-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stock-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  min-width: 40px;
+}
+.stock-num.bajo { color: var(--rojo); }
+.stock-num.medio { color: var(--naranja); }
+.stock-num.bueno { color: var(--verde-vivo); }
+
+.baja-row td { opacity: 0.5; text-decoration: line-through; }
+.baja-row:hover td { background: #fde8e8; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  main { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gris);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state p { font-size: 16px; }
+
+.sheets-info {
+  background: linear-gradient(135deg, #e8f5ea 0%, #d4f0d9 100%);
+  border: 2px solid var(--verde-suave);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.sheets-info-icon { font-size: 32px; flex-shrink: 0; }
+.sheets-info h4 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--verde-oscuro);
+  margin-bottom: 4px;
+}
+.sheets-info p { font-size: 13px; color: var(--verde-medio); }
+.sheets-info code {
+  background: rgba(255,255,255,0.7);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--verde-oscuro);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <img src="data:image/jpeg;base64,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" alt="EcoHabitat" style="height:40px;filter:brightness(0) invert(1)">
+    <div class="logo-title">
+      EcoHabitat
+      <span>Almacén Mantenimiento</span>
+    </div>
+  </div>
+  <div class="sync-status">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncLabel">Listo</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('inventario')">
+    📦 Inventario
+  </button>
+  <button class="tab-btn" onclick="switchTab('maquinaria')">
+    ⚙️ Maquinaria
+  </button>
+  <button class="tab-btn" onclick="switchTab('mantenimiento')">
+    🔧 Mantenimiento
+  </button>
+  <button class="tab-btn" onclick="switchTab('config')">
+    ⚙️ Configuración
+  </button>
+</nav>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<main>
+
+<!-- ===== INVENTARIO ===== -->
+<div class="section active" id="section-inventario">
+  <div class="page-header">
+    <div class="page-title">Inventario <span>de Almacenes</span></div>
+    <button class="btn btn-primary" onclick="openModal('modalAltaProducto')">
+      ＋ Dar de Alta
+    </button>
+  </div>
+
+  <div class="stats-row" id="statsInventario"></div>
+
+  <div class="card">
+    <div class="card-header">
+      📦 Productos en Almacén
+      <div class="almacen-toggle" style="margin-left:auto">
+        <button class="almacen-btn active" id="btnTodos" onclick="setAlmacenFiltro('todos')">Todos</button>
+        <button class="almacen-btn" id="btnZarza" onclick="setAlmacenFiltro('zarza')">Zarza</button>
+        <button class="almacen-btn" id="btnPlasencia" onclick="setAlmacenFiltro('plasencia')">Plasencia</button>
+      </div>
+    </div>
+    <div style="padding:16px">
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInventario" placeholder="Buscar producto..." oninput="renderInventario()">
+        </div>
+        <select id="filterStock" onchange="renderInventario()">
+          <option value="">Todos los stocks</option>
+          <option value="cero">Sin stock (0)</option>
+          <option value="bajo">Stock bajo (1-5)</option>
+          <option value="ok">Stock OK (>5)</option>
+        </select>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Zarza la Mayor</th>
+              <th>Plasencia</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaInventario"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="paginacionInventario"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAQUINARIA ===== -->
+<div class="section" id="section-maquinaria">
+  <div class="page-header">
+    <div class="page-title">Registro de <span>Maquinaria</span></div>
+    <button class="btn btn-primary" onclick="openModal('modalAltaMaquinaria')">
+      ＋ Nueva Máquina
+    </button>
+  </div>
+
+  <div class="stats-row" id="statsMaquinaria"></div>
+
+  <div class="card">
+    <div class="card-header">⚙️ Listado de Maquinaria</div>
+    <div style="padding:16px">
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchMaquinaria" placeholder="Buscar marca, serie..." oninput="renderMaquinaria()">
+        </div>
+        <select id="filterCategoria" onchange="renderMaquinaria()">
+          <option value="">Todas las categorías</option>
+          <option value="Desbrozadoras">Desbrozadoras</option>
+          <option value="Motosierras">Motosierras</option>
+          <option value="Herramientas">Herramientas</option>
+        </select>
+        <select id="filterBaja" onchange="renderMaquinaria()">
+          <option value="activas">Solo activas</option>
+          <option value="">Todas</option>
+          <option value="bajas">Solo bajas</option>
+        </select>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Nº</th>
+              <th>Categoría</th>
+              <th>Marca / Equipo</th>
+              <th>Nº Serie / Matrícula</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaMaquinaria"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="paginacionMaquinaria"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MANTENIMIENTO ===== -->
+<div class="section" id="section-mantenimiento">
+  <div class="page-header">
+    <div class="page-title">Registro de <span>Mantenimiento</span></div>
+    <button class="btn btn-primary" onclick="openModal('modalRegistroMant')">
+      ＋ Registrar Mantenimiento
+    </button>
+  </div>
+
+  <div class="stats-row" id="statsMantenimiento"></div>
+
+  <div class="card">
+    <div class="card-header">🔧 Historial de Mantenimiento</div>
+    <div style="padding:16px">
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchMant" placeholder="Buscar máquina o técnico..." oninput="renderMantenimiento()">
+        </div>
+        <select id="filterTipoMant" onchange="renderMantenimiento()">
+          <option value="">Todos los tipos</option>
+          <option value="Diario">Diario</option>
+          <option value="Semanal/Quincenal">Semanal/Quincenal</option>
+          <option value="Mensual">Mensual</option>
+          <option value="Por uso">Por uso</option>
+        </select>
+        <select id="filterCategoriaMant" onchange="renderMantenimiento()">
+          <option value="">Todas las categorías</option>
+          <option value="Desbrozadoras">Desbrozadoras</option>
+          <option value="Motosierras">Motosierras</option>
+          <option value="Herramientas">Herramientas</option>
+        </select>
+      </div>
+      <div id="listaMantenimiento"></div>
+      <div class="pagination" id="paginacionMant"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONFIG ===== -->
+<div class="section" id="section-config">
+  <div class="page-header">
+    <div class="page-title">⚙️ <span>Configuración</span></div>
+  </div>
+
+  <div class="sheets-info">
+    <div class="sheets-info-icon">📊</div>
+    <div>
+      <h4>Integración con Google Sheets</h4>
+      <p>Los datos se sincronizan con Google Sheets. Configura el ID de tu hoja y la URL del Web App (Google Apps Script) para activar la sincronización en tiempo real.</p>
+    </div>
+  </div>
+
+  <div class="config-box">
+    <h3>🔗 Conexión Google Sheets</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>ID de Google Sheets</label>
+        <input type="text" id="sheetsId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" value="">
+      </div>
+      <div class="form-group">
+        <label>URL Web App (Apps Script)</label>
+        <input type="text" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec" value="">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Almacén por defecto del encargado</label>
+      <select id="defaultAlmacen">
+        <option value="ambos">Ambos almacenes</option>
+        <option value="zarza">Zarza la Mayor</option>
+        <option value="plasencia">Plasencia</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="guardarConfig()">💾 Guardar Configuración</button>
+      <button class="btn btn-secondary" onclick="testConexion()">🔌 Probar Conexión</button>
+      <button class="btn btn-secondary" onclick="exportarDatos()">📥 Exportar JSON</button>
+      <button class="btn btn-secondary" onclick="sincronizarSheets()">🔄 Sincronizar Ahora</button>
+    </div>
+  </div>
+
+  <div class="config-box">
+    <h3>📋 Instrucciones de configuración Google Sheets</h3>
+    <ol style="padding-left:20px;font-size:14px;line-height:2;color:#444">
+      <li>Crea una Google Sheet con 3 pestañas: <strong>Inventario</strong>, <strong>Maquinaria</strong> y <strong>Mantenimiento</strong></li>
+      <li>En la pestaña Inventario, la cabecera debe ser: <code>Item | Zarza | Plasencia | Fecha</code></li>
+      <li>En la pestaña Maquinaria: <code>Categoria | Numero | Marca | Serie | Baja | ObsBaja</code></li>
+      <li>En la pestaña Mantenimiento: <code>Fecha | Maquina | Categoria | TipoMant | Tareas | Tecnico | Observaciones</code></li>
+      <li>Ve a <strong>Extensiones → Apps Script</strong> y pega el código del archivo <code>apps-script.gs</code></li>
+      <li>Despliega como <strong>Web App</strong> con acceso "Cualquier persona" y copia la URL</li>
+      <li>Copia el ID de tu Google Sheet desde la URL y pégalo arriba</li>
+    </ol>
+    <div style="margin-top:16px">
+      <button class="btn btn-secondary" onclick="mostrarAppsScript()">📄 Ver código Apps Script</button>
+    </div>
+    <div id="appsScriptCode" style="display:none;margin-top:16px">
+      <pre style="background:#1e3d2f;color:#a8d5b0;padding:16px;border-radius:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap" id="scriptCodeText"></pre>
+    </div>
+  </div>
+
+  <div class="config-box">
+    <h3>🚀 Despliegue en GitHub Pages</h3>
+    <ol style="padding-left:20px;font-size:14px;line-height:2;color:#444">
+      <li>Sube <code>index.html</code>, <code>Logo_Ecohabitat.jpg</code> y <code>apps-script.gs</code> a un repositorio GitHub</li>
+      <li>Ve a <strong>Settings → Pages</strong> y activa GitHub Pages desde la rama <code>main</code></li>
+      <li>Tu app estará disponible en <code>https://tu-usuario.github.io/nombre-repo</code></li>
+    </ol>
+  </div>
+</div>
+
+</main>
+
+<!-- ===== MODALES ===== -->
+
+<!-- Modal Alta Producto -->
+<div class="modal-overlay" id="modalAltaProducto">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📦 Dar de Alta Producto</h3>
+      <button class="modal-close" onclick="closeModal('modalAltaProducto')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre del producto *</label>
+        <input type="text" id="altaItem" placeholder="Ej: AZADAS SIN MANGO">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Unidades Zarza la Mayor</label>
+          <input type="number" id="altaZarza" value="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Unidades Plasencia</label>
+          <input type="number" id="altaPlasencia" value="0" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>¿Es maquinaria con mantenimiento?</label>
+        <select id="altaEsMaquinaria" onchange="toggleMaquinariaFields()">
+          <option value="no">No</option>
+          <option value="si">Sí</option>
+        </select>
+      </div>
+      <div id="camposMaquinaria" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categoría *</label>
+            <select id="altaCategoria" onchange="calcularSiguienteNumero()">
+              <option value="Desbrozadoras">Desbrozadoras</option>
+              <option value="Motosierras">Motosierras</option>
+              <option value="Herramientas">Herramientas</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nº asignado</label>
+            <input type="text" id="altaNumeroMaq" readonly style="background:#f0f0f0;font-weight:700">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Marca / Equipo *</label>
+            <input type="text" id="altaMarca" placeholder="Ej: STIHL FS560">
+          </div>
+          <div class="form-group">
+            <label>Nº Serie / Matrícula</label>
+            <input type="text" id="altaSerie" placeholder="Nº de serie">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalAltaProducto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="darDeAlta()">✓ Dar de Alta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Stock -->
+<div class="modal-overlay" id="modalEditarStock">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✏️ Editar Stock</h3>
+      <button class="modal-close" onclick="closeModal('modalEditarStock')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Producto</label>
+        <input type="text" id="editItemNombre" readonly style="background:#f0f0f0;font-weight:600">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Unidades Zarza la Mayor</label>
+          <input type="number" id="editZarza" min="0">
+        </div>
+        <div class="form-group">
+          <label>Unidades Plasencia</label>
+          <input type="number" id="editPlasencia" min="0">
+        </div>
+      </div>
+      <input type="hidden" id="editItemIdx">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="darDeBajaProducto()">🗑 Dar de Baja</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalEditarStock')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarStock()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Alta Maquinaria -->
+<div class="modal-overlay" id="modalAltaMaquinaria">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>⚙️ Nueva Máquina</h3>
+      <button class="modal-close" onclick="closeModal('modalAltaMaquinaria')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categoría *</label>
+          <select id="nuevaCategoria" onchange="calcularSiguienteNumeroMaq()">
+            <option value="Desbrozadoras">Desbrozadoras</option>
+            <option value="Motosierras">Motosierras</option>
+            <option value="Herramientas">Herramientas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nº asignado</label>
+          <input type="text" id="nuevaNumeroMaq" readonly style="background:#f0f0f0;font-weight:700;font-size:18px">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Marca / Equipo *</label>
+          <input type="text" id="nuevaMarca" placeholder="Ej: STIHL FS560">
+        </div>
+        <div class="form-group">
+          <label>Nº Serie / Matrícula</label>
+          <input type="text" id="nuevaSerie" placeholder="Nº de serie">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Observaciones iniciales</label>
+        <textarea id="nuevaObs" rows="2" placeholder="Observaciones opcionales..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalAltaMaquinaria')">Cancelar</button>
+      <button class="btn btn-primary" onclick="darDeAltaMaquinaria()">✓ Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Baja Maquinaria -->
+<div class="modal-overlay" id="modalBajaMaquinaria">
+  <div class="modal">
+    <div class="modal-header" style="background:#c0392b">
+      <h3>🚫 Dar de Baja Máquina</h3>
+      <button class="modal-close" onclick="closeModal('modalBajaMaquinaria')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Máquina</label>
+        <input type="text" id="bajaMaqNombre" readonly style="background:#f0f0f0;font-weight:600">
+      </div>
+      <div class="form-group">
+        <label>Motivo de la baja *</label>
+        <textarea id="bajaMaqMotivo" rows="3" placeholder="Ej: Daño irreparable en el motor, BAJA 15/01/2025"></textarea>
+      </div>
+      <input type="hidden" id="bajaMaqIdx">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalBajaMaquinaria')">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarBajaMaquinaria()">🚫 Confirmar Baja</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Registro Mantenimiento -->
+<div class="modal-overlay" id="modalRegistroMant">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3>🔧 Registrar Mantenimiento</h3>
+      <button class="modal-close" onclick="closeModal('modalRegistroMant')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categoría *</label>
+          <select id="mantCategoria" onchange="actualizarSelectorMaquinas();actualizarChecksMant()">
+            <option value="Desbrozadoras">Desbrozadoras</option>
+            <option value="Motosierras">Motosierras</option>
+            <option value="Herramientas">Herramientas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Máquina *</label>
+          <select id="mantMaquina"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de mantenimiento *</label>
+          <select id="mantTipo" onchange="actualizarChecksMant()">
+            <option value="Diario">Diario</option>
+            <option value="Semanal/Quincenal">Semanal / Quincenal</option>
+            <option value="Mensual">Mensual</option>
+            <option value="Por uso">Por uso (Herramientas)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha *</label>
+          <input type="date" id="mantFecha">
+        </div>
+      </div>
+      <div id="mantChecks"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Técnico responsable *</label>
+          <input type="text" id="mantTecnico" placeholder="Nombre del técnico">
+        </div>
+        <div class="form-group">
+          <label>Almacén</label>
+          <select id="mantAlmacen">
+            <option value="Zarza la Mayor">Zarza la Mayor</option>
+            <option value="Plasencia">Plasencia</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Observaciones</label>
+        <textarea id="mantObs" rows="2" placeholder="Piezas sustituidas, incidencias, etc."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalRegistroMant')">Cancelar</button>
+      <button class="btn btn-primary" onclick="registrarMantenimiento()">✓ Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Apps Script -->
+<div class="modal-overlay" id="modalAppsScript">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <h3>📄 Código Google Apps Script</h3>
+      <button class="modal-close" onclick="closeModal('modalAppsScript')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px;font-size:14px;color:#666">Copia este código en tu Google Apps Script (Extensiones → Apps Script) y despliégalo como Web App.</p>
+      <pre id="appsScriptContent" style="background:#1e3d2f;color:#a8d5b0;padding:16px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre-wrap;max-height:400px;overflow-y:auto"></pre>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalAppsScript')">Cerrar</button>
+      <button class="btn btn-primary" onclick="copiarAppsScript()">📋 Copiar código</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATOS
+// ============================================================
+const MAQUINARIA_CATEGORIES = ['Desbrozadoras', 'Motosierras', 'Herramientas'];
+
+// Checks de mantenimiento por tipo y categoría
+const MAINT_CHECKS = {
+  'Desbrozadoras': {
+    'Diario': ['Limpieza de filtro de aire', 'Engrase cabezal', 'Cambio de disco', 'Limpieza de carcasa'],
+    'Semanal/Quincenal': ['Revisión general', 'Limpieza de bujías', 'Limpieza filtros de combustible'],
+    'Mensual': ['Revisión y limpieza general', 'Cambio de piezas dañadas'],
+    'Por uso': ['Limpieza general', 'Revisión de partes', 'Revisión de baterías/conexiones']
+  },
+  'Motosierras': {
+    'Diario': ['Limpieza de filtro de aire', 'Engrase cabezal/cadena', 'Revisión de disco/cadena', 'Limpieza de carcasa'],
+    'Semanal/Quincenal': ['Revisión general', 'Limpieza de bujías', 'Limpieza filtros de combustible'],
+    'Mensual': ['Revisión y limpieza general', 'Cambio de piezas dañadas'],
+    'Por uso': ['Limpieza general', 'Revisión de partes', 'Revisión de baterías/conexiones']
+  },
+  'Herramientas': {
+    'Diario': ['Limpieza general'],
+    'Semanal/Quincenal': ['Limpieza general', 'Revisión de partes (cuchillas, filtros...)'],
+    'Mensual': ['Revisión y limpieza general', 'Cambio de piezas dañadas'],
+    'Por uso': ['Limpieza general', 'Revisión de partes (cuchillas, filtros...)', 'Revisión de baterías', 'Revisión de conexiones eléctricas']
+  }
+};
+
+// Estado de la app
+let state = {
+  inventario: [],
+  maquinaria: [],
+  mantenimiento: [],
+  config: { sheetsId: '', appsScriptUrl: '', defaultAlmacen: 'ambos' }
+};
+
+let pagInventario = 1, pagMaquinaria = 1, pagMant = 1;
+const POR_PAGINA = 20;
+let almacenFiltro = 'todos';
+
+// ============================================================
+// DATOS INICIALES (del Excel)
+// ============================================================
+const INVENTARIO_INICIAL = [{"item":"ACEITE CADENA (L)","zarza":150,"plasencia":15},{"item":"ACEITE MEZCLA (L)","zarza":40,"plasencia":3},{"item":"ACEITE MEZCLA (L)","zarza":20,"plasencia":20},{"item":"ALAMBRE FORTEMA DE 1,50 METROS a 100 METROS","zarza":0,"plasencia":6},{"item":"ALAMBRE GALVANIZADO N\u00b016 (ROLLO DE 25KG)","zarza":0,"plasencia":6},{"item":"ALARGADERA 20 mt","zarza":1,"plasencia":0},{"item":"ALARGADERA 30 mt","zarza":1,"plasencia":0},{"item":"ALARGADERA 50 mt","zarza":0,"plasencia":2},{"item":"ANTORCHA DE MANO SOLDAR KT745","zarza":0,"plasencia":1},{"item":"ARNESES DESBROZADORA","zarza":0,"plasencia":6},{"item":"ARNESES SEGURIDAD","zarza":0,"plasencia":3},{"item":"AZADAS","zarza":10,"plasencia":15},{"item":"AZADAS SIN MANGO","zarza":11,"plasencia":20},{"item":"BANCADA FITOSANITARIOS 600LITROS","zarza":0,"plasencia":1},{"item":"BATEFUEGOS","zarza":8,"plasencia":6},{"item":"BOTIQUINES","zarza":7,"plasencia":0},{"item":"BOTIQUINES REPUESTO","zarza":3,"plasencia":0},{"item":"CABALLETE DE OBRA METALICO","zarza":0,"plasencia":21},{"item":"C\u00c1MARAS FOTO TRAMPEO","zarza":0,"plasencia":2},{"item":"CAPAZO DE GOMA DE 40 LITROS","zarza":8,"plasencia":183},{"item":"CARRETILLAS","zarza":2,"plasencia":4},{"item":"CEPILLO GRANDE","zarza":1,"plasencia":0},{"item":"CEPILLO PEQUE\u00d1O","zarza":1,"plasencia":0},{"item":"CIZALLA","zarza":0,"plasencia":1},{"item":"CLAVAESTACAS GASOLINA","zarza":0,"plasencia":2},{"item":"CLAVAESTACAS MANUAL PARA REDONDILLOS","zarza":0,"plasencia":4},{"item":"CRIBA","zarza":0,"plasencia":1},{"item":"CUBA DE EXTINCI\u00d3N DE INCENDIOS 1000 LITROS","zarza":0,"plasencia":1},{"item":"CUBA FITOSANITARIA HERPA 100 LITROS","zarza":0,"plasencia":1},{"item":"CUERDA 10MM (m)","zarza":0,"plasencia":100},{"item":"CULTIVADOR DE1,40 M","zarza":0,"plasencia":1},{"item":"DEPOSITOS 1000 LITROS","zarza":0,"plasencia":2},{"item":"DISCOS DE DESBROZADORAS (Cajas de 20 unidades)","zarza":1,"plasencia":0},{"item":"ESCUADRA METALICA GRANDE","zarza":0,"plasencia":1},{"item":"ESPUERTAS","zarza":25,"plasencia":0},{"item":"ESTACAS DE MADERA","zarza":0,"plasencia":100},{"item":"FLEJES DE 6MM","zarza":0,"plasencia":5},{"item":"FLEJES DE 8MM","zarza":0,"plasencia":4},{"item":"FLEJES DESBROZADORA","zarza":35,"plasencia":8},{"item":"FLEJES DESBROZADORA CAJA","zarza":4,"plasencia":0},{"item":"FUMIGADORA DE MOCHILA","zarza":0,"plasencia":3},{"item":"GAFAS PROTECCI\u00d3N","zarza":10,"plasencia":15},{"item":"GATOS HIDRAULICOS","zarza":2,"plasencia":2},{"item":"GENERADOR GASOLINA","zarza":1,"plasencia":1},{"item":"GUANTES CUERO","zarza":20,"plasencia":15},{"item":"GUANTES NITRILO","zarza":50,"plasencia":30},{"item":"HACHA","zarza":5,"plasencia":3},{"item":"HERRAMIENTA MULTIUSOS (LEATHERMAN)","zarza":2,"plasencia":1},{"item":"HORMIGONERA","zarza":1,"plasencia":0},{"item":"JAULAS CONEJOS","zarza":2,"plasencia":0},{"item":"LAMPARA SOLAR PORTATIL","zarza":0,"plasencia":3},{"item":"LONA IMPERMEABLE","zarza":3,"plasencia":5},{"item":"MACHETES","zarza":8,"plasencia":6},{"item":"MADERA PARA ESTACAS 2X5","zarza":0,"plasencia":100},{"item":"MALLAS VEGETALES","zarza":0,"plasencia":50},{"item":"MANGUERA 50M","zarza":1,"plasencia":2},{"item":"MARTILLO","zarza":5,"plasencia":4},{"item":"MASCARILLAS FFP2","zarza":20,"plasencia":10},{"item":"METRO","zarza":3,"plasencia":2},{"item":"MOCHILA FUMIGADORA ELECTRICA","zarza":0,"plasencia":2},{"item":"NIVEL","zarza":2,"plasencia":1},{"item":"PALA","zarza":15,"plasencia":12},{"item":"PALA PUNTA","zarza":8,"plasencia":6},{"item":"PALANCAS","zarza":3,"plasencia":2},{"item":"PALETA ALBAÑIL","zarza":2,"plasencia":1},{"item":"PICOS","zarza":8,"plasencia":5},{"item":"PICOS SIN MANGO","zarza":5,"plasencia":3},{"item":"PISTOLA SILICONA","zarza":1,"plasencia":1},{"item":"POSTE METALICO REDONDO","zarza":0,"plasencia":50},{"item":"RASTRILLO","zarza":8,"plasencia":6},{"item":"RASTRILLO ARENA","zarza":2,"plasencia":1},{"item":"RED DE CAZA","zarza":0,"plasencia":5},{"item":"RODILLO PINTURA","zarza":3,"plasencia":2},{"item":"ROTULADORES PERMANENTES","zarza":5,"plasencia":3},{"item":"SACOS TIERRA","zarza":0,"plasencia":20},{"item":"SARILLO","zarza":3,"plasencia":2},{"item":"SIERRA DE MANO","zarza":3,"plasencia":2},{"item":"TIJERAS DE PODA","zarza":5,"plasencia":4},{"item":"TIJERAS DE PODA LARGA","zarza":2,"plasencia":3},{"item":"TIJERAS ELECTRICAS","zarza":1,"plasencia":1},{"item":"TIJERAS NEUMATICAS","zarza":0,"plasencia":2},{"item":"TORNILLOS VARIOS","zarza":50,"plasencia":30},{"item":"TRAMPAS TOPILLOS","zarza":10,"plasencia":5},{"item":"TUBERIA PVC VARIOS DIAMETROS","zarza":0,"plasencia":20},{"item":"VALLAS METALICAS","zarza":0,"plasencia":10},{"item":"VARILLA ROSCADA","zarza":0,"plasencia":20},{"item":"VASIJA CERAMICA","zarza":0,"plasencia":2},{"item":"VISERAS PROTECCION","zarza":5,"plasencia":8},{"item":"ZAPAPICOS","zarza":4,"plasencia":3}];
+
+const MAQUINARIA_INICIAL = [{"categoria":"Desbrozadoras","numero":1,"marca":"STHIL FS560","serie":"187505160","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":2,"marca":"STHIL FS560","serie":"187427347","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":3,"marca":"STHIL FS560","serie":"191249365","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":4,"marca":"STHIL FS560","serie":"187427361","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":5,"marca":"STHIL FS560","serie":"185521834","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":6,"marca":"STHIL FS560","serie":"177806158","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":7,"marca":"STHIL FS560","serie":"185521828","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":8,"marca":"STHIL FS560","serie":"177968570","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":9,"marca":"STHIL FS560","serie":"185521836","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":10,"marca":"STHIL FS560","serie":"177806137","baja":"S\u00ed","obs_baja":"BAJA 06/05/20205"},{"categoria":"Desbrozadoras","numero":11,"marca":"STHIL FS561","serie":"193598050","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":12,"marca":"STHIL FS561","serie":"193598054","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":13,"marca":"STHIL FS561","serie":"187427356","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":14,"marca":"STHIL FS561","serie":"177958862","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":15,"marca":"STHIL FS561","serie":"191390280","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":16,"marca":"STHIL FS561","serie":"191390270","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":17,"marca":"STHIL FS561","serie":"191390281","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":18,"marca":"STHIL FS561","serie":"191390276","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":19,"marca":"STHIL FS561","serie":"191910314","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":20,"marca":"STHIL FS561","serie":"192990311","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":21,"marca":"STHIL FS561","serie":"192910312","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":22,"marca":"STHIL FS561","serie":"192910313","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":23,"marca":"STHIL FS561","serie":"192980561","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":24,"marca":"STHIL FS561","serie":"192980553","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":25,"marca":"STHIL FS561","serie":"192980563","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":26,"marca":"STHIL FS561","serie":"192980568","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":27,"marca":"STHIL FS561","serie":"193598024","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":28,"marca":"STHIL FS561","serie":"193598055","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":29,"marca":"STHIL FS561","serie":"193598052","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":30,"marca":"STHIL FS561","serie":"193598057","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":31,"marca":"STHIL FS561","serie":"193598048","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":32,"marca":"STHIL FS561","serie":"193598046","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":33,"marca":"STHIL FS562","serie":"197064900","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":34,"marca":"STHIL FS562","serie":"197064901","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":35,"marca":"STHIL FS562","serie":"197064902","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":36,"marca":"STHIL FS562","serie":"197064903","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":37,"marca":"STHIL FS562","serie":"197064904","baja":"No","obs_baja":""},{"categoria":"Desbrozadoras","numero":38,"marca":"STHIL FS562","serie":"197064905","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":1,"marca":"STHIL MS261","serie":"277982673","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":2,"marca":"STHIL MS261","serie":"264551094","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":3,"marca":"STHIL MS261","serie":"264588291","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":4,"marca":"STHIL MS261","serie":"264588296","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":5,"marca":"STHIL MS261","serie":"268413200","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":6,"marca":"STHIL MS261","serie":"268413138","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":7,"marca":"STHIL MS261","serie":"271052067","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":8,"marca":"STHIL MS261","serie":"271052064","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":9,"marca":"STHIL MS261","serie":"271052072","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":10,"marca":"STHIL MS261","serie":"271052073","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":11,"marca":"STHIL MS261","serie":"271052071","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":12,"marca":"STHIL MS261","serie":"271052063","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":13,"marca":"STHIL MS261","serie":"271052066","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":14,"marca":"STHIL MS261","serie":"271052061","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":15,"marca":"STHIL MS261","serie":"271052060","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":16,"marca":"STHIL MS261","serie":"271052062","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":17,"marca":"STHIL MS261","serie":"280095098","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":18,"marca":"STHIL MS261","serie":"280095097","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":19,"marca":"STHIL MS261","serie":"280095099","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":20,"marca":"STHIL MS261","serie":"280095100","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":21,"marca":"STHIL MS261","serie":"280095101","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":22,"marca":"STHIL MS261","serie":"284527290","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":23,"marca":"STHIL MS261","serie":"284527291","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":24,"marca":"STHIL MS261","serie":"284527292","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":25,"marca":"STHIL MS261","serie":"284527293","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":26,"marca":"STHIL MS261","serie":"284527294","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":27,"marca":"STHIL MS261","serie":"284527295","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":28,"marca":"STHIL MS261","serie":"284527296","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":29,"marca":"STHIL MS261","serie":"291740010","baja":"No","obs_baja":""},{"categoria":"Motosierras","numero":30,"marca":"STHIL MS261","serie":"291740011","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":1,"marca":"AMOLADORA ANGULAR BOSCH GWS22-230","serie":"740206204","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":2,"marca":"BOMBA DE AGUA GASOLINA ANOVA BG 7.50","serie":"23B152108","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":3,"marca":"BOMBA DE AGUA GASOLINA ANOVA BG 7.50","serie":"23B152107","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":4,"marca":"BOMBA PARA DEPÓSITO 12V","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":5,"marca":"BOMBA PARA CUBA FITOSANITARIA","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":6,"marca":"CABESTRANTE ELECTRIC 12V DRAGON WINCH","serie":"DWM4500HD","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":7,"marca":"COMPRESOR MICHELIN MBL25","serie":"17082330071","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":8,"marca":"EQUIPO DE SOLDADURA OERLIKON 160A","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":9,"marca":"GENERADOR GASOLINA GARZA 4500W","serie":"21H020296","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":10,"marca":"GENERADOR GASOLINA GARZA 7000W","serie":"210106011","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":11,"marca":"GENERADOR HONDA 6500W","serie":"EZGB1042882","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":12,"marca":"HORMIGONERA HYUNDAI","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":13,"marca":"HIDROLIMPIADORA KARCHER K5","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":14,"marca":"HIDROLIMPIADORA KARCHER K5","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":15,"marca":"INVERTER GALA GAR SOLDADOR ATLANTIC-160A","serie":"IEC60974-1","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":16,"marca":"INVERTER GALA GAR SOLDADOR ATLANTIC-160A","serie":"IEC60974-1","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":17,"marca":"INVERTER GALA GAR SOLDADOR ATLANTIC-160A","serie":"IEC60974-1","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":18,"marca":"INVERTER GALA GAR SOLDADOR ATLANTIC-160A","serie":"IEC60974-1","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":19,"marca":"INVERTER GALA GAR SOLDADOR ATLANTIC-180A","serie":"IEC60974-1","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":20,"marca":"INVERTER GALA GAR SOLDADOR ATLANTIC-200A","serie":"IEC60974-1","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":21,"marca":"MARTILLO PERCUTOR INNCO","serie":"24357390169","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":22,"marca":"MOTOAZADAS STHIL MH6.1","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":23,"marca":"MOTOBOMBA GASOLINA ANOVA","serie":"23B152120","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":24,"marca":"PISTOLA AIRE CALIENTE POWER PLUS","serie":"230154/00417","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":25,"marca":"RADIAL BATERIA BOSCH","serie":"423063305","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":26,"marca":"RADIAL BATERIA POWER PLUS 20V","serie":"POR231092/1456","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":27,"marca":"RADIAL GRANDE BOSCH","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":28,"marca":"RETROEXCAVADORA PARA BOBCAT S175","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":29,"marca":"ROTAVATOR TRACTOR MASCHIO","serie":"63100101","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":30,"marca":"SIERRA DE CALAR POWER PLUS","serie":"180236/1150","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":31,"marca":"SOPLADOR BATERIA POWER PLUS","serie":"230971/00086","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":32,"marca":"SOPLADOR BATERIA RYOBI","serie":"46249802005290","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":33,"marca":"TALADRO BATERIA MAKITA 18V","serie":"1021777","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":34,"marca":"TALADRO BOSCH","serie":"127000085","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":35,"marca":"TALADRO COLUMNA TR201B","serie":"11B0525090","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":36,"marca":"TRACTOR DEUTZ-FAHR AGROKID 50CV","serie":"D056474WT-1359","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":37,"marca":"TRACTOR PASCUALI 25CV","serie":"E8244-BBP","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":38,"marca":"TRANSPALETA MANUAL","serie":"","baja":"No","obs_baja":""},{"categoria":"Herramientas","numero":39,"marca":"VIBRADOR HORMIGON","serie":"23594342","baja":"No","obs_baja":""}];
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  cargarDatosLocales();
+  // Si no hay datos guardados, cargar iniciales
+  if (state.inventario.length === 0) {
+    state.inventario = INVENTARIO_INICIAL.map((d,i) => ({...d, id: i, activo: true}));
+  }
+  if (state.maquinaria.length === 0) {
+    state.maquinaria = MAQUINARIA_INICIAL.map((d,i) => ({...d, id: i}));
+  }
+  
+  // Fecha de hoy en modal mantenimiento
+  document.getElementById('mantFecha').value = new Date().toISOString().split('T')[0];
+  
+  renderInventario();
+  renderMaquinaria();
+  renderMantenimiento();
+  renderStatsInventario();
+  renderStatsMaquinaria();
+  renderStatsMantenimiento();
+  actualizarSelectorMaquinas();
+  actualizarChecksMant();
+  calcularSiguienteNumeroMaq();
+  
+  document.getElementById('appsScriptContent').textContent = getAppsScriptCode();
+}
+
+// ============================================================
+// PERSISTENCIA LOCAL
+// ============================================================
+function guardarDatosLocales() {
+  localStorage.setItem('ecohabitat_state', JSON.stringify(state));
+}
+
+function cargarDatosLocales() {
+  const saved = localStorage.getItem('ecohabitat_state');
+  if (saved) {
+    try {
+      state = JSON.parse(saved);
+    } catch(e) {}
+  }
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + tab).classList.add('active');
+  event.currentTarget.classList.add('active');
+  
+  if (tab === 'mantenimiento') {
+    actualizarSelectorMaquinas();
+    actualizarChecksMant();
+  }
+}
+
+// ============================================================
+// INVENTARIO
+// ============================================================
+function setAlmacenFiltro(a) {
+  almacenFiltro = a;
+  document.querySelectorAll('.almacen-btn').forEach(b => b.classList.remove('active'));
+  const ids = {todos:'btnTodos', zarza:'btnZarza', plasencia:'btnPlasencia'};
+  document.getElementById(ids[a]).classList.add('active');
+  pagInventario = 1;
+  renderInventario();
+}
+
+function filtrarInventario() {
+  const q = document.getElementById('searchInventario').value.toLowerCase();
+  const stock = document.getElementById('filterStock').value;
+  return state.inventario.filter(p => {
+    if (!p.activo) return false;
+    if (!p.item.toLowerCase().includes(q)) return false;
+    const uds = almacenFiltro === 'zarza' ? p.zarza : almacenFiltro === 'plasencia' ? p.plasencia : p.zarza + p.plasencia;
+    if (stock === 'cero' && uds !== 0) return false;
+    if (stock === 'bajo' && (uds <= 0 || uds > 5)) return false;
+    if (stock === 'ok' && uds <= 5) return false;
+    return true;
+  });
+}
+
+function renderInventario() {
+  const datos = filtrarInventario();
+  const total = datos.length;
+  const inicio = (pagInventario - 1) * POR_PAGINA;
+  const pagina = datos.slice(inicio, inicio + POR_PAGINA);
+  
+  const tb = document.getElementById('tablaInventario');
+  tb.innerHTML = '';
+  
+  if (!pagina.length) {
+    tb.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon">📦</div><p>No hay productos que coincidan</p></div></td></tr>';
+  } else {
+    pagina.forEach(p => {
+      const total_uds = p.zarza + p.plasencia;
+      const stockClass = total_uds === 0 ? 'bajo' : total_uds <= 5 ? 'medio' : 'bueno';
+      const idx = state.inventario.indexOf(p);
+      tb.innerHTML += `
+        <tr>
+          <td><strong>${p.item}</strong></td>
+          <td><span class="stock-num ${p.zarza===0?'bajo':p.zarza<=5?'medio':'bueno'}">${p.zarza}</span></td>
+          <td><span class="stock-num ${p.plasencia===0?'bajo':p.plasencia<=5?'medio':'bueno'}">${p.plasencia}</span></td>
+          <td><span class="stock-num ${stockClass}">${total_uds}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="abrirEditarStock(${idx})">✏️ Editar</button>
+          </td>
+        </tr>`;
+    });
+  }
+  
+  renderPaginacion('paginacionInventario', total, pagInventario, (p) => { pagInventario = p; renderInventario(); });
+  renderStatsInventario();
+}
+
+function renderStatsInventario() {
+  const activos = state.inventario.filter(p => p.activo);
+  const sinStock = activos.filter(p => p.zarza === 0 && p.plasencia === 0).length;
+  const stockBajo = activos.filter(p => (p.zarza + p.plasencia) > 0 && (p.zarza + p.plasencia) <= 5).length;
+  
+  document.getElementById('statsInventario').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value">${activos.length}</div>
+      <div class="stat-label">Productos Activos</div>
+    </div>
+    <div class="stat-card naranja">
+      <div class="stat-value">${sinStock}</div>
+      <div class="stat-label">Sin Stock</div>
+    </div>
+    <div class="stat-card tierra">
+      <div class="stat-value">${stockBajo}</div>
+      <div class="stat-label">Stock Bajo (≤5)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${activos.reduce((a,p)=>a+p.zarza,0)}</div>
+      <div class="stat-label">Uds. Zarza</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${activos.reduce((a,p)=>a+p.plasencia,0)}</div>
+      <div class="stat-label">Uds. Plasencia</div>
+    </div>`;
+}
+
+function abrirEditarStock(idx) {
+  const p = state.inventario[idx];
+  document.getElementById('editItemNombre').value = p.item;
+  document.getElementById('editZarza').value = p.zarza;
+  document.getElementById('editPlasencia').value = p.plasencia;
+  document.getElementById('editItemIdx').value = idx;
+  openModal('modalEditarStock');
+}
+
+function guardarStock() {
+  const idx = parseInt(document.getElementById('editItemIdx').value);
+  const zarza = parseInt(document.getElementById('editZarza').value) || 0;
+  const plasencia = parseInt(document.getElementById('editPlasencia').value) || 0;
+  state.inventario[idx].zarza = zarza;
+  state.inventario[idx].plasencia = plasencia;
+  state.inventario[idx].fechaActualizacion = new Date().toISOString();
+  guardarDatosLocales();
+  closeModal('modalEditarStock');
+  renderInventario();
+  toast('✅ Stock actualizado correctamente');
+  syncToSheets('inventario');
+}
+
+function darDeBajaProducto() {
+  const idx = parseInt(document.getElementById('editItemIdx').value);
+  if (!confirm(`¿Confirmas dar de baja "${state.inventario[idx].item}"? Esta acción se puede deshacer manualmente.`)) return;
+  state.inventario[idx].activo = false;
+  guardarDatosLocales();
+  closeModal('modalEditarStock');
+  renderInventario();
+  toast('🗑️ Producto dado de baja', 'warning');
+  syncToSheets('inventario');
+}
+
+function darDeAlta() {
+  const item = document.getElementById('altaItem').value.trim().toUpperCase();
+  if (!item) { toast('⚠️ Introduce el nombre del producto', 'error'); return; }
+  const zarza = parseInt(document.getElementById('altaZarza').value) || 0;
+  const plasencia = parseInt(document.getElementById('altaPlasencia').value) || 0;
+  const esMaq = document.getElementById('altaEsMaquinaria').value;
+  
+  const nuevoProducto = {
+    id: Date.now(),
+    item, zarza, plasencia, activo: true,
+    fechaAlta: new Date().toISOString()
+  };
+  state.inventario.push(nuevoProducto);
+  
+  if (esMaq === 'si') {
+    const categoria = document.getElementById('altaCategoria').value;
+    const marca = document.getElementById('altaMarca').value.trim();
+    const serie = document.getElementById('altaSerie').value.trim();
+    const numero = calcularSiguienteNum(categoria);
+    if (!marca) { toast('⚠️ Introduce la marca/equipo', 'error'); return; }
+    state.maquinaria.push({
+      id: Date.now() + 1,
+      categoria, numero, marca, serie, baja: 'No', obs_baja: '',
+      fechaAlta: new Date().toISOString()
+    });
+  }
+  
+  guardarDatosLocales();
+  closeModal('modalAltaProducto');
+  document.getElementById('altaItem').value = '';
+  document.getElementById('altaZarza').value = 0;
+  document.getElementById('altaPlasencia').value = 0;
+  document.getElementById('altaEsMaquinaria').value = 'no';
+  toggleMaquinariaFields();
+  renderInventario();
+  renderMaquinaria();
+  toast('✅ Producto dado de alta correctamente');
+  syncToSheets('inventario');
+}
+
+function toggleMaquinariaFields() {
+  const esMaq = document.getElementById('altaEsMaquinaria').value;
+  document.getElementById('camposMaquinaria').style.display = esMaq === 'si' ? 'block' : 'none';
+  if (esMaq === 'si') calcularSiguienteNumero();
+}
+
+// ============================================================
+// MAQUINARIA
+// ============================================================
+function calcularSiguienteNum(categoria) {
+  const nums = state.maquinaria.filter(m => m.categoria === categoria).map(m => m.numero);
+  return nums.length ? Math.max(...nums) + 1 : 1;
+}
+
+function calcularSiguienteNumero() {
+  const cat = document.getElementById('altaCategoria').value;
+  document.getElementById('altaNumeroMaq').value = calcularSiguienteNum(cat);
+}
+
+function calcularSiguienteNumeroMaq() {
+  const cat = document.getElementById('nuevaCategoria').value;
+  document.getElementById('nuevaNumeroMaq').value = calcularSiguienteNum(cat);
+}
+
+function filtrarMaquinaria() {
+  const q = document.getElementById('searchMaquinaria').value.toLowerCase();
+  const cat = document.getElementById('filterCategoria').value;
+  const baja = document.getElementById('filterBaja').value;
+  return state.maquinaria.filter(m => {
+    if (cat && m.categoria !== cat) return false;
+    if (baja === 'activas' && m.baja === 'Sí') return false;
+    if (baja === 'bajas' && m.baja !== 'Sí') return false;
+    if (q && !m.marca.toLowerCase().includes(q) && !m.serie.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function renderMaquinaria() {
+  const datos = filtrarMaquinaria();
+  const inicio = (pagMaquinaria - 1) * POR_PAGINA;
+  const pagina = datos.slice(inicio, inicio + POR_PAGINA);
+  
+  const tb = document.getElementById('tablaMaquinaria');
+  tb.innerHTML = '';
+  
+  const catClass = {Desbrozadoras:'desbro', Motosierras:'moto', Herramientas:'herra'};
+  const catEmoji = {Desbrozadoras:'🌿', Motosierras:'🪚', Herramientas:'🔧'};
+  
+  if (!pagina.length) {
+    tb.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">⚙️</div><p>No hay maquinaria que coincida</p></div></td></tr>';
+  } else {
+    pagina.forEach(m => {
+      const idx = state.maquinaria.indexOf(m);
+      const isBaja = m.baja === 'Sí';
+      tb.innerHTML += `
+        <tr class="${isBaja ? 'baja-row' : ''}">
+          <td><span class="num-badge ${catClass[m.categoria]}">${m.numero}</span></td>
+          <td><span class="badge ${m.categoria==='Desbrozadoras'?'badge-verde':m.categoria==='Motosierras'?'badge-naranja':'badge-azul'}">${catEmoji[m.categoria]} ${m.categoria}</span></td>
+          <td><strong>${m.marca}</strong></td>
+          <td style="font-family:monospace;font-size:12px;color:#666">${m.serie || '—'}</td>
+          <td>
+            ${isBaja 
+              ? `<span class="badge badge-rojo">🚫 BAJA</span>` 
+              : `<span class="badge badge-verde">✅ Activa</span>`}
+          </td>
+          <td>
+            ${isBaja ? '' : `
+              <button class="btn btn-naranja btn-sm" onclick="abrirRegistroMantDesde('${m.categoria}', ${idx})">🔧 Mant.</button>
+              <button class="btn btn-danger btn-sm" onclick="abrirBajaMaquinaria(${idx})">🚫 Baja</button>
+            `}
+          </td>
+        </tr>`;
+    });
+  }
+  
+  renderPaginacion('paginacionMaquinaria', datos.length, pagMaquinaria, (p) => { pagMaquinaria = p; renderMaquinaria(); });
+  renderStatsMaquinaria();
+}
+
+function renderStatsMaquinaria() {
+  const activas = state.maquinaria.filter(m => m.baja !== 'Sí');
+  const desbro = activas.filter(m => m.categoria === 'Desbrozadoras').length;
+  const moto = activas.filter(m => m.categoria === 'Motosierras').length;
+  const herra = activas.filter(m => m.categoria === 'Herramientas').length;
+  const bajas = state.maquinaria.filter(m => m.baja === 'Sí').length;
+  
+  document.getElementById('statsMaquinaria').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value">${activas.length}</div>
+      <div class="stat-label">Máquinas Activas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${desbro}</div>
+      <div class="stat-label">🌿 Desbrozadoras</div>
+    </div>
+    <div class="stat-card naranja">
+      <div class="stat-value">${moto}</div>
+      <div class="stat-label">🪚 Motosierras</div>
+    </div>
+    <div class="stat-card tierra">
+      <div class="stat-value">${herra}</div>
+      <div class="stat-label">🔧 Herramientas</div>
+    </div>
+    <div class="stat-card rojo">
+      <div class="stat-value">${bajas}</div>
+      <div class="stat-label">Bajas</div>
+    </div>`;
+}
+
+function darDeAltaMaquinaria() {
+  const categoria = document.getElementById('nuevaCategoria').value;
+  const marca = document.getElementById('nuevaMarca').value.trim();
+  const serie = document.getElementById('nuevaSerie').value.trim();
+  const obs = document.getElementById('nuevaObs').value.trim();
+  
+  if (!marca) { toast('⚠️ Introduce la marca/equipo', 'error'); return; }
+  
+  const numero = calcularSiguienteNum(categoria);
+  state.maquinaria.push({
+    id: Date.now(),
+    categoria, numero, marca, serie,
+    baja: 'No', obs_baja: obs,
+    fechaAlta: new Date().toISOString()
+  });
+  
+  guardarDatosLocales();
+  closeModal('modalAltaMaquinaria');
+  document.getElementById('nuevaMarca').value = '';
+  document.getElementById('nuevaSerie').value = '';
+  document.getElementById('nuevaObs').value = '';
+  renderMaquinaria();
+  toast(`✅ ${categoria.slice(0,-1)} nº${numero} registrada correctamente`);
+  syncToSheets('maquinaria');
+}
+
+function abrirBajaMaquinaria(idx) {
+  const m = state.maquinaria[idx];
+  document.getElementById('bajaMaqNombre').value = `${m.categoria} Nº${m.numero} - ${m.marca}`;
+  document.getElementById('bajaMaqMotivo').value = '';
+  document.getElementById('bajaMaqIdx').value = idx;
+  openModal('modalBajaMaquinaria');
+}
+
+function confirmarBajaMaquinaria() {
+  const idx = parseInt(document.getElementById('bajaMaqIdx').value);
+  const motivo = document.getElementById('bajaMaqMotivo').value.trim();
+  if (!motivo) { toast('⚠️ Introduce el motivo de la baja', 'error'); return; }
+  state.maquinaria[idx].baja = 'Sí';
+  state.maquinaria[idx].obs_baja = `BAJA ${new Date().toLocaleDateString('es-ES')} - ${motivo}`;
+  guardarDatosLocales();
+  closeModal('modalBajaMaquinaria');
+  renderMaquinaria();
+  toast('🚫 Máquina dada de baja', 'warning');
+  syncToSheets('maquinaria');
+}
+
+function abrirRegistroMantDesde(categoria, maqIdx) {
+  document.getElementById('mantCategoria').value = categoria;
+  actualizarSelectorMaquinas();
+  // Seleccionar la máquina correcta
+  const m = state.maquinaria[maqIdx];
+  const sel = document.getElementById('mantMaquina');
+  for (let opt of sel.options) {
+    if (opt.value == maqIdx) { sel.value = maqIdx; break; }
+  }
+  actualizarChecksMant();
+  openModal('modalRegistroMant');
+  switchTab('mantenimiento');
+}
+
+// ============================================================
+// MANTENIMIENTO
+// ============================================================
+function actualizarSelectorMaquinas() {
+  const cat = document.getElementById('mantCategoria').value;
+  const sel = document.getElementById('mantMaquina');
+  sel.innerHTML = '';
+  state.maquinaria.filter(m => m.categoria === cat && m.baja !== 'Sí').forEach((m, i) => {
+    const idx = state.maquinaria.indexOf(m);
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = `Nº${m.numero} - ${m.marca}`;
+    sel.appendChild(opt);
+  });
+}
+
+function actualizarChecksMant() {
+  const cat = document.getElementById('mantCategoria').value;
+  const tipo = document.getElementById('mantTipo').value;
+  const checks = MAINT_CHECKS[cat]?.[tipo] || [];
+  
+  const colores = {Diario:'#d4ecd9', 'Semanal/Quincenal':'#fef5e3', Mensual:'#fde8e3', 'Por uso':'#e3ecff'};
+  
+  document.getElementById('mantChecks').innerHTML = `
+    <div class="maint-section" style="background:${colores[tipo]||'#eef2ee'}">
+      <div class="maint-section-title">${tipo} — Tareas a realizar</div>
+      ${checks.map((c,i) => `
+        <label class="check-item">
+          <input type="checkbox" id="check_${i}" value="${c}">
+          ${c}
+        </label>`).join('')}
+    </div>`;
+}
+
+function registrarMantenimiento() {
+  const cat = document.getElementById('mantCategoria').value;
+  const maqIdx = document.getElementById('mantMaquina').value;
+  const tipo = document.getElementById('mantTipo').value;
+  const fecha = document.getElementById('mantFecha').value;
+  const tecnico = document.getElementById('mantTecnico').value.trim();
+  const almacen = document.getElementById('mantAlmacen').value;
+  const obs = document.getElementById('mantObs').value.trim();
+  
+  if (!maqIdx) { toast('⚠️ Selecciona una máquina', 'error'); return; }
+  if (!fecha) { toast('⚠️ Introduce la fecha', 'error'); return; }
+  if (!tecnico) { toast('⚠️ Introduce el técnico responsable', 'error'); return; }
+  
+  const checks = MAINT_CHECKS[cat]?.[tipo] || [];
+  const tareasSeleccionadas = checks.filter((c, i) => {
+    const el = document.getElementById(`check_${i}`);
+    return el && el.checked;
+  });
+  
+  if (tareasSeleccionadas.length === 0) { toast('⚠️ Marca al menos una tarea realizada', 'error'); return; }
+  
+  const maq = state.maquinaria[maqIdx];
+  const registro = {
+    id: Date.now(),
+    fecha, categoria: cat,
+    maquina: `${maq.categoria} Nº${maq.numero} - ${maq.marca}`,
+    tipo, tareas: tareasSeleccionadas,
+    tecnico, almacen, observaciones: obs,
+    timestamp: new Date().toISOString()
+  };
+  
+  state.mantenimiento.unshift(registro);
+  guardarDatosLocales();
+  closeModal('modalRegistroMant');
+  renderMantenimiento();
+  renderStatsMantenimiento();
+  
+  // Reset checks
+  document.getElementById('mantTecnico').value = '';
+  document.getElementById('mantObs').value = '';
+  document.querySelectorAll('#mantChecks input[type=checkbox]').forEach(cb => cb.checked = false);
+  
+  toast(`✅ Mantenimiento ${tipo} registrado para ${maq.marca}`);
+  syncToSheets('mantenimiento');
+}
+
+function filtrarMantenimiento() {
+  const q = document.getElementById('searchMant').value.toLowerCase();
+  const tipo = document.getElementById('filterTipoMant').value;
+  const cat = document.getElementById('filterCategoriaMant').value;
+  return state.mantenimiento.filter(r => {
+    if (tipo && r.tipo !== tipo) return false;
+    if (cat && r.categoria !== cat) return false;
+    if (q && !r.maquina.toLowerCase().includes(q) && !r.tecnico.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function renderMantenimiento() {
+  const datos = filtrarMantenimiento();
+  const inicio = (pagMant - 1) * POR_PAGINA;
+  const pagina = datos.slice(inicio, inicio + POR_PAGINA);
+  
+  const lista = document.getElementById('listaMantenimiento');
+  
+  if (!pagina.length) {
+    lista.innerHTML = '<div class="empty-state"><div class="icon">🔧</div><p>No hay registros de mantenimiento aún.<br>Usa el botón "Registrar Mantenimiento" para empezar.</p></div>';
+    return;
+  }
+  
+  const tipoClass = {Diario:'diario', 'Semanal/Quincenal':'semanal', Mensual:'mensual', 'Por uso':'uso'};
+  const tipoColor = {Diario:'badge-verde', 'Semanal/Quincenal':'badge-naranja', Mensual:'badge-rojo', 'Por uso':'badge-azul'};
+  
+  lista.innerHTML = pagina.map(r => `
+    <div class="maint-log-entry ${tipoClass[r.tipo]||''}">
+      <div class="maint-log-header">
+        <div>
+          <div class="maint-log-title">${r.maquina}</div>
+          <span class="badge ${tipoColor[r.tipo]||'badge-gris'}">${r.tipo}</span>
+          <span class="badge badge-gris" style="margin-left:6px">${r.almacen}</span>
+        </div>
+        <div style="text-align:right">
+          <div class="maint-log-date">${formatFecha(r.fecha)}</div>
+          <div style="font-size:12px;color:#999;margin-top:2px">👤 ${r.tecnico}</div>
+        </div>
+      </div>
+      <div class="maint-log-checks">
+        ${r.tareas.map(t => `<span class="maint-check-tag">✓ ${t}</span>`).join('')}
+      </div>
+      ${r.observaciones ? `<div style="margin-top:8px;font-size:13px;color:#666;border-top:1px solid #eee;padding-top:8px">📝 ${r.observaciones}</div>` : ''}
+    </div>`).join('');
+  
+  renderPaginacion('paginacionMant', datos.length, pagMant, (p) => { pagMant = p; renderMantenimiento(); });
+  renderStatsMantenimiento();
+}
+
+function renderStatsMantenimiento() {
+  const total = state.mantenimiento.length;
+  const hoy = new Date().toISOString().split('T')[0];
+  const esteMes = new Date().toISOString().slice(0,7);
+  const hoyCount = state.mantenimiento.filter(r => r.fecha === hoy).length;
+  const mesCount = state.mantenimiento.filter(r => r.fecha?.startsWith(esteMes)).length;
+  
+  document.getElementById('statsMantenimiento').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value">${total}</div>
+      <div class="stat-label">Total Registros</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${hoyCount}</div>
+      <div class="stat-label">Hoy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${mesCount}</div>
+      <div class="stat-label">Este mes</div>
+    </div>
+    <div class="stat-card naranja">
+      <div class="stat-value">${state.mantenimiento.filter(r=>r.tipo==='Diario').length}</div>
+      <div class="stat-label">Mantenimiento Diario</div>
+    </div>
+    <div class="stat-card tierra">
+      <div class="stat-value">${state.mantenimiento.filter(r=>r.tipo==='Mensual').length}</div>
+      <div class="stat-label">Mantenimiento Mensual</div>
+    </div>`;
+}
+
+// ============================================================
+// GOOGLE SHEETS SYNC
+// ============================================================
+async function syncToSheets(tipo) {
+  const url = state.config.appsScriptUrl;
+  if (!url) return;
+  
+  setSyncStatus('Sincronizando...', true);
+  
+  try {
+    const payload = { action: 'sync', tipo, datos: state[tipo] };
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+    if (result.ok) {
+      setSyncStatus('Sincronizado ✓', false);
+    } else {
+      setSyncStatus('Error al sincronizar', false);
+    }
+  } catch(e) {
+    setSyncStatus('Sin conexión', false);
+  }
+}
+
+async function sincronizarSheets() {
+  const url = state.config.appsScriptUrl;
+  if (!url) { toast('⚠️ Configura la URL de Apps Script primero', 'error'); return; }
+  setSyncStatus('Sincronizando todo...', true);
+  await syncToSheets('inventario');
+  await syncToSheets('maquinaria');
+  await syncToSheets('mantenimiento');
+  toast('✅ Sincronización completa con Google Sheets');
+}
+
+function setSyncStatus(msg, active) {
+  document.getElementById('syncLabel').textContent = msg;
+  const dot = document.getElementById('syncDot');
+  dot.style.background = active ? '#f1c40f' : '#6dbf74';
+}
+
+async function testConexion() {
+  const url = state.config.appsScriptUrl;
+  if (!url) { toast('⚠️ Introduce la URL del Apps Script primero', 'error'); return; }
+  setSyncStatus('Probando...', true);
+  try {
+    const r = await fetch(url + '?action=ping');
+    const data = await r.json();
+    if (data.ok) {
+      toast('✅ Conexión con Google Sheets exitosa');
+      setSyncStatus('Conectado ✓', false);
+    } else { throw new Error(); }
+  } catch(e) {
+    toast('❌ No se pudo conectar con Google Sheets', 'error');
+    setSyncStatus('Error de conexión', false);
+  }
+}
+
+// ============================================================
+// CONFIG
+// ============================================================
+function guardarConfig() {
+  state.config.sheetsId = document.getElementById('sheetsId').value.trim();
+  state.config.appsScriptUrl = document.getElementById('appsScriptUrl').value.trim();
+  state.config.defaultAlmacen = document.getElementById('defaultAlmacen').value;
+  guardarDatosLocales();
+  toast('✅ Configuración guardada');
+}
+
+function exportarDatos() {
+  const json = JSON.stringify(state, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ecohabitat_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('📥 Datos exportados');
+}
+
+function mostrarAppsScript() {
+  openModal('modalAppsScript');
+}
+
+function copiarAppsScript() {
+  const code = document.getElementById('appsScriptContent').textContent;
+  navigator.clipboard.writeText(code).then(() => toast('📋 Código copiado al portapapeles'));
+}
+
+// ============================================================
+// APPS SCRIPT CODE
+// ============================================================
+function getAppsScriptCode() {
+  return `// EcoHabitat - Google Apps Script
+// Despliega como Web App con acceso "Cualquier persona"
+
+const SHEET_ID = ''; // Rellena con el ID de tu Google Sheet
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    
+    if (data.action === 'sync') {
+      const sheet = ss.getSheetByName(capitalizar(data.tipo)) || ss.insertSheet(capitalizar(data.tipo));
+      sheet.clearContents();
+      
+      if (data.tipo === 'inventario') {
+        sheet.appendRow(['Item', 'Zarza', 'Plasencia', 'Activo', 'Fecha Actualización']);
+        data.datos.forEach(d => sheet.appendRow([d.item, d.zarza, d.plasencia, d.activo ? 'Sí' : 'No', d.fechaActualizacion || '']));
+      } else if (data.tipo === 'maquinaria') {
+        sheet.appendRow(['Categoría', 'Número', 'Marca/Equipo', 'Nº Serie', 'Baja', 'Obs. Baja', 'Fecha Alta']);
+        data.datos.forEach(d => sheet.appendRow([d.categoria, d.numero, d.marca, d.serie, d.baja, d.obs_baja, d.fechaAlta || '']));
+      } else if (data.tipo === 'mantenimiento') {
+        sheet.appendRow(['Fecha', 'Máquina', 'Categoría', 'Tipo Mantenimiento', 'Tareas', 'Técnico', 'Almacén', 'Observaciones']);
+        data.datos.forEach(d => sheet.appendRow([d.fecha, d.maquina, d.categoria, d.tipo, d.tareas.join('; '), d.tecnico, d.almacen, d.observaciones || '']));
+      }
+      
+      return ContentService.createTextOutput(JSON.stringify({ok: true})).setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ok: false, error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  if (e.parameter.action === 'ping') {
+    return ContentService.createTextOutput(JSON.stringify({ok: true, message: 'EcoHabitat Apps Script activo'})).setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(JSON.stringify({ok: true})).setMimeType(ContentService.MimeType.JSON);
+}
+
+function capitalizar(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}`;
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id === 'modalAltaMaquinaria') calcularSiguienteNumeroMaq();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Cerrar modal al click fuera
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+function toast(msg, type = 'success') {
+  const div = document.createElement('div');
+  div.className = `toast ${type === 'error' ? 'error' : type === 'warning' ? 'warning' : ''}`;
+  div.textContent = msg;
+  document.getElementById('toastContainer').appendChild(div);
+  setTimeout(() => div.remove(), 3500);
+}
+
+function formatFecha(str) {
+  if (!str) return '—';
+  const d = new Date(str + 'T12:00:00');
+  return d.toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
+}
+
+function renderPaginacion(containerId, total, pagActual, onPage) {
+  const container = document.getElementById(containerId);
+  const totalPags = Math.ceil(total / POR_PAGINA);
+  if (totalPags <= 1) { container.innerHTML = ''; return; }
+  let html = '';
+  for (let i = 1; i <= totalPags; i++) {
+    html += `<button class="page-btn ${i===pagActual?'active':''}" onclick="(${onPage})(${i})">${i}</button>`;
+  }
+  container.innerHTML = `<span style="font-size:13px;color:#999">${total} resultados</span> ${html}`;
+}
+
+// ============================================================
+// START
+// ============================================================
+init();
+</script>
+</body>
+</html>
