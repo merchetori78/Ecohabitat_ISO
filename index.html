@@ -1434,6 +1434,7 @@ let state = {
   inventario: [],
   maquinaria: [],
   mantenimiento: [],
+  movimientosInventario: [],
   config: {...DEFAULT_CONFIG}
 };
 
@@ -1493,6 +1494,7 @@ function cargarDatosLocales() {
       state = JSON.parse(saved);
     } catch(e) {}
   }
+  if (!Array.isArray(state.movimientosInventario)) state.movimientosInventario = [];
 }
 
 function aplicarConfigPorDefecto() {
@@ -1638,18 +1640,74 @@ function abrirEditarStock(idx) {
   openModal('modalEditarStock');
 }
 
+
+function registrarMovimientoInventario(producto, almacen, stockAnterior, stockNuevo, observaciones = 'Edición de stock') {
+  stockAnterior = Number(stockAnterior) || 0;
+  stockNuevo = Number(stockNuevo) || 0;
+  const diferencia = stockNuevo - stockAnterior;
+  if (diferencia === 0) return null;
+  const movimiento = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    fecha: new Date().toISOString(),
+    producto: producto.item,
+    almacen,
+    stockAnterior,
+    stockNuevo,
+    diferencia,
+    movimiento: diferencia > 0 ? 'Entrada' : 'Salida',
+    responsable: 'App Ecohabitat',
+    observaciones,
+    origen: 'App Ecohabitat',
+    sincronizado: false
+  };
+  state.movimientosInventario.push(movimiento);
+  return movimiento;
+}
+
+async function syncMovimientosInventarioPendientes() {
+  const url = state.config.appsScriptUrl;
+  if (!url || !Array.isArray(state.movimientosInventario)) return;
+  const pendientes = state.movimientosInventario.filter(m => !m.sincronizado);
+  if (pendientes.length === 0) return;
+
+  try {
+    const payload = { action: 'appendMovimientosInventario', datos: pendientes };
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+    if (result.ok) {
+      const ids = new Set(pendientes.map(m => m.id));
+      state.movimientosInventario.forEach(m => { if (ids.has(m.id)) m.sincronizado = true; });
+      guardarDatosLocales();
+    }
+  } catch(e) {
+    console.warn('No se pudieron sincronizar movimientos de inventario', e);
+  }
+}
+
 function guardarStock() {
   const idx = parseInt(document.getElementById('editItemIdx').value);
   const zarza = parseInt(document.getElementById('editZarza').value) || 0;
   const plasencia = parseInt(document.getElementById('editPlasencia').value) || 0;
-  state.inventario[idx].zarza = zarza;
-  state.inventario[idx].plasencia = plasencia;
-  state.inventario[idx].fechaActualizacion = new Date().toISOString();
+  const producto = state.inventario[idx];
+  const zarzaAnterior = Number(producto.zarza) || 0;
+  const plasenciaAnterior = Number(producto.plasencia) || 0;
+
+  registrarMovimientoInventario(producto, 'Zarza la Mayor', zarzaAnterior, zarza, 'Edición de stock desde app');
+  registrarMovimientoInventario(producto, 'Plasencia', plasenciaAnterior, plasencia, 'Edición de stock desde app');
+
+  producto.zarza = zarza;
+  producto.plasencia = plasencia;
+  producto.fechaActualizacion = new Date().toISOString();
   guardarDatosLocales();
   closeModal('modalEditarStock');
   renderInventario();
   toast('✅ Stock actualizado correctamente');
   syncToSheets('inventario');
+  syncMovimientosInventarioPendientes();
 }
 
 function darDeBajaProducto() {
@@ -1676,6 +1734,8 @@ function darDeAlta() {
     fechaAlta: new Date().toISOString()
   };
   state.inventario.push(nuevoProducto);
+  if (zarza > 0) registrarMovimientoInventario(nuevoProducto, 'Zarza la Mayor', 0, zarza, 'Alta de producto desde app');
+  if (plasencia > 0) registrarMovimientoInventario(nuevoProducto, 'Plasencia', 0, plasencia, 'Alta de producto desde app');
   
   if (esMaq === 'si') {
     const categoria = document.getElementById('altaCategoria').value;
@@ -1701,6 +1761,7 @@ function darDeAlta() {
   renderMaquinaria();
   toast('✅ Producto dado de alta correctamente');
   syncToSheets('inventario');
+  syncMovimientosInventarioPendientes();
 }
 
 function toggleMaquinariaFields() {
@@ -2208,6 +2269,7 @@ async function sincronizarSheets() {
   await syncToSheets('inventario');
   await syncToSheets('maquinaria');
   await syncToSheets('mantenimiento');
+  await syncMovimientosInventarioPendientes();
   toast('✅ Sincronización completa con Google Sheets');
 }
 
