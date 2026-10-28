@@ -1750,6 +1750,7 @@ function darDeBajaProducto() {
   const idx = parseInt(document.getElementById('editItemIdx').value);
   if (!confirm(`¿Confirmas dar de baja "${state.inventario[idx].item}"? Esta acción se puede deshacer manualmente.`)) return;
   state.inventario[idx].activo = false;
+  state.inventario[idx].fechaActualizacion = new Date().toISOString();
   guardarDatosLocales();
   closeModal('modalEditarStock');
   renderInventario();
@@ -1782,7 +1783,8 @@ function darDeAlta() {
     state.maquinaria.push({
       id: Date.now() + 1,
       categoria, numero, marca, serie, baja: 'No', obs_baja: '',
-      fechaAlta: new Date().toISOString()
+      fechaAlta: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     });
   }
   
@@ -1886,6 +1888,7 @@ function usosMaquina(m) {
   const label = etiquetaMaquina(m);
   return (state.uso || [])
     .filter(u => u.maquinaId === m.id || u.maquina === label)
+    .filter(u => !u.borrado)
     .map(u => u.fecha)
     .filter(Boolean)
     .sort();
@@ -1967,7 +1970,7 @@ function marcarCategoriaUso(cat, valor) {
 
 function renderHistorialUso() {
   const cont = document.getElementById('usoHistorial');
-  const ultimos = (state.uso || []).slice().sort((a,b) => (b.timestamp || '').localeCompare(a.timestamp || '')).slice(0, 8);
+  const ultimos = (state.uso || []).filter(u => !u.borrado).slice().sort((a,b) => (b.timestamp || '').localeCompare(a.timestamp || '')).slice(0, 8);
   if (!ultimos.length) { cont.innerHTML = '<span style="color:#999">Aún no hay usos registrados.</span>'; return; }
   cont.innerHTML = ultimos.map(u => `<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid #f0f0f0">
       <span>${formatFecha(u.fecha)} · ${u.maquina}${u.nota ? ' · ' + u.nota : ''}</span>
@@ -1986,7 +1989,7 @@ function guardarUso() {
     const m = state.maquinaria[idx];
     if (!m) return;
     const label = etiquetaMaquina(m);
-    if (state.uso.some(u => u.fecha === fecha && (u.maquinaId === m.id || u.maquina === label))) return; // ya registrado ese dia
+    if (state.uso.some(u => !u.borrado && u.fecha === fecha && (u.maquinaId === m.id || u.maquina === label))) return; // ya registrado ese dia
     state.uso.unshift({
       id: Date.now() + i,
       fecha, maquinaId: m.id, maquina: label, categoria: m.categoria, nota,
@@ -2005,7 +2008,8 @@ function guardarUso() {
 
 function borrarUso(id) {
   if (!confirm('¿Borrar este registro de uso?')) return;
-  state.uso = state.uso.filter(u => u.id !== id);
+  const u = state.uso.find(x => x.id === id);
+  if (u) { u.borrado = true; u.updatedAt = new Date().toISOString(); }
   guardarDatosLocales();
   renderHistorialUso();
   renderMaquinaria();
@@ -2112,7 +2116,8 @@ function darDeAltaMaquinaria() {
     id: Date.now(),
     categoria, numero, marca, serie,
     baja: 'No', obs_baja: obs,
-    fechaAlta: new Date().toISOString()
+    fechaAlta: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   });
   
   guardarDatosLocales();
@@ -2138,6 +2143,7 @@ function confirmarBajaMaquinaria() {
   const motivo = document.getElementById('bajaMaqMotivo').value.trim();
   if (!motivo) { toast('⚠️ Introduce el motivo de la baja', 'error'); return; }
   state.maquinaria[idx].baja = 'Sí';
+  state.maquinaria[idx].updatedAt = new Date().toISOString();
   state.maquinaria[idx].obs_baja = `BAJA ${new Date().toLocaleDateString('es-ES')} - ${motivo}`;
   guardarDatosLocales();
   closeModal('modalBajaMaquinaria');
@@ -2390,12 +2396,18 @@ function renderStatsMantenimiento() {
 // ============================================================
 // GOOGLE SHEETS SYNC
 // ============================================================
-async function syncToSheets(tipo) {
+// Cola: solo una sincronizacion a la vez (evita pisarse a si misma).
+let syncCola = Promise.resolve();
+function syncToSheets(tipo) {
+  syncCola = syncCola.then(() => syncUna(tipo)).catch(() => {});
+  return syncCola;
+}
+
+// Sincronizar = FUSIONAR: se envia lo local, la hoja une los registros de todos los dispositivos y devuelve el resultado.
+async function syncUna(tipo) {
   const url = state.config.appsScriptUrl;
   if (!url) return;
-  
   setSyncStatus('Sincronizando...', true);
-  
   try {
     const payload = { action: 'sync', tipo, datos: state[tipo] };
     const response = await fetch(url, {
@@ -2405,6 +2417,7 @@ async function syncToSheets(tipo) {
     });
     const result = await response.json();
     if (result.ok) {
+      if (Array.isArray(result.datos)) fusionarRemoto(tipo, result.datos);
       setSyncStatus('Sincronizado ✓', false);
     } else {
       setSyncStatus('Error al sincronizar', false);
@@ -2414,14 +2427,41 @@ async function syncToSheets(tipo) {
   }
 }
 
+// Aplica lo devuelto por la hoja y conserva lo que se haya registrado en este dispositivo mientras tanto.
+function fusionarRemoto(tipo, remoto) {
+  const ids = new Set(remoto.map(x => String(x.id)));
+  const locales = (state[tipo] || []).filter(x => !ids.has(String(x.id)));
+  state[tipo] = remoto.concat(locales);
+  guardarDatosLocales();
+  refrescarTodo();
+}
+
+function refrescarTodo() {
+  renderInventario();
+  renderMaquinaria();
+  renderStatsMaquinaria();
+  renderMantenimiento();
+  renderStatsInventario();
+  renderStatsMantenimiento();
+  if (!document.querySelector('.modal-overlay.open')) {
+    actualizarSelectorMaquinas();
+    actualizarChecksMant();
+  }
+}
+
+async function sincronizarTodoSilencioso() {
+  if (!state.config.appsScriptUrl) return;
+  await syncToSheets('maquinaria');
+  await syncToSheets('inventario');
+  await syncToSheets('mantenimiento');
+  await syncToSheets('uso');
+}
+
 async function sincronizarSheets() {
   const url = state.config.appsScriptUrl;
   if (!url) { toast('⚠️ Configura la URL de Apps Script primero', 'error'); return; }
   setSyncStatus('Sincronizando todo...', true);
-  await syncToSheets('inventario');
-  await syncToSheets('maquinaria');
-  await syncToSheets('mantenimiento');
-  await syncToSheets('uso');
+  await sincronizarTodoSilencioso();
   await syncMovimientosInventarioPendientes();
   toast('✅ Sincronización completa con Google Sheets');
 }
@@ -2610,6 +2650,9 @@ function renderPaginacion(containerId, total, pagActual, onPage) {
 // START
 // ============================================================
 init();
+sincronizarTodoSilencioso();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizarTodoSilencioso(); });
+setInterval(sincronizarTodoSilencioso, 5 * 60 * 1000);
 </script>
 </body>
 </html>
