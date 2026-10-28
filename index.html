@@ -925,9 +925,10 @@ tr:hover td { background: var(--verde-palo); }
 <div class="section" id="section-maquinaria">
   <div class="page-header">
     <div class="page-title">Registro de <span>Maquinaria</span></div>
-    <button class="btn btn-primary" onclick="openModal('modalAltaMaquinaria')">
-      ＋ Nueva Máquina
-    </button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-naranja" onclick="abrirRegistroUso()">📍 Registrar uso</button>
+      <button class="btn btn-primary" onclick="openModal('modalAltaMaquinaria')">＋ Nueva Máquina</button>
+    </div>
   </div>
 
   <div class="stats-row" id="statsMaquinaria"></div>
@@ -977,9 +978,10 @@ tr:hover td { background: var(--verde-palo); }
 <div class="section" id="section-mantenimiento">
   <div class="page-header">
     <div class="page-title">Registro de <span>Mantenimiento</span></div>
-    <button class="btn btn-primary" onclick="openModal('modalRegistroMant')">
-      ＋ Registrar Mantenimiento
-    </button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-naranja" onclick="abrirRegistroUso()">📍 Registrar uso</button>
+      <button class="btn btn-primary" onclick="openModal('modalRegistroMant')">＋ Registrar Mantenimiento</button>
+    </div>
   </div>
 
   <div class="stats-row" id="statsMantenimiento"></div>
@@ -1364,6 +1366,36 @@ tr:hover td { background: var(--verde-palo); }
   </div>
 </div>
 
+<!-- Modal Registro de uso -->
+<div class="modal-overlay" id="modalRegistroUso">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3>📍 Registrar uso de maquinaria</h3>
+      <button class="modal-close" onclick="closeModal('modalRegistroUso')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:#666;margin-bottom:12px">Marca las máquinas que se han usado. El mantenimiento solo será exigible en las máquinas usadas desde su último mantenimiento (PR-08, "por uso").</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha de uso *</label>
+          <input type="date" id="usoFecha">
+        </div>
+        <div class="form-group">
+          <label>Obra / nota (opcional)</label>
+          <input type="text" id="usoNota" placeholder="Ej.: obra, municipio, cuadrilla">
+        </div>
+      </div>
+      <div id="usoListaMaquinas" style="max-height:300px;overflow:auto;border:1px solid #e3e8e3;border-radius:8px;padding:10px;margin-bottom:14px"></div>
+      <div style="font-weight:600;font-size:13px;margin-bottom:6px">Últimos usos registrados</div>
+      <div id="usoHistorial" style="font-size:13px;color:#555"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalRegistroUso')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarUso()">✓ Guardar uso</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Apps Script -->
 <div class="modal-overlay" id="modalAppsScript">
   <div class="modal" style="max-width:700px">
@@ -1419,8 +1451,10 @@ const MAINT_INTERVALS = {
 const MAINT_PLAN = {
   'Desbrozadoras': ['Diario', 'Semanal/Quincenal', 'Mensual'],
   'Motosierras': ['Diario', 'Semanal/Quincenal', 'Mensual'],
-  'Herramientas': ['Mensual']
+  'Herramientas': ['Por uso', 'Mensual']
 };
+// Mantenimiento POR USO (PR-08 ap. 5): solo es exigible si el equipo se ha usado desde el ultimo mantenimiento.
+const MAINT_POR_USO = ['Diario', 'Por uso'];
 
 // Configuración predefinida de EcoHabitat
 const DEFAULT_CONFIG = {
@@ -1434,6 +1468,7 @@ let state = {
   inventario: [],
   maquinaria: [],
   mantenimiento: [],
+  uso: [],
   movimientosInventario: [],
   config: {...DEFAULT_CONFIG}
 };
@@ -1495,6 +1530,7 @@ function cargarDatosLocales() {
     } catch(e) {}
   }
   if (!Array.isArray(state.movimientosInventario)) state.movimientosInventario = [];
+  if (!Array.isArray(state.uso)) state.uso = [];
 }
 
 function aplicarConfigPorDefecto() {
@@ -1829,10 +1865,16 @@ function diffDays(dateA, dateB) {
   return Math.floor((b - a) / 86400000);
 }
 
+function hoyLocal() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
 function registrosMaquina(m, tipo) {
   const label = etiquetaMaquina(m);
+  const tipos = MAINT_POR_USO.includes(tipo) ? MAINT_POR_USO : [tipo];
   return state.mantenimiento
-    .filter(r => r.tipo === tipo && (r.maquinaId === m.id || r.maquina === label))
+    .filter(r => tipos.includes(r.tipo) && (r.maquinaId === m.id || r.maquina === label))
     .sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
 }
 
@@ -1840,26 +1882,136 @@ function ultimoMantenimiento(m, tipo) {
   return registrosMaquina(m, tipo)[0] || null;
 }
 
+function usosMaquina(m) {
+  const label = etiquetaMaquina(m);
+  return (state.uso || [])
+    .filter(u => u.maquinaId === m.id || u.maquina === label)
+    .map(u => u.fecha)
+    .filter(Boolean)
+    .sort();
+}
+
+function ultimoUsoMaquina(m) {
+  const u = usosMaquina(m);
+  return u.length ? u[u.length - 1] : null;
+}
+
+// Mantenimiento por uso: una maquina solo tiene tareas pendientes si se ha usado desde su ultimo mantenimiento.
 function estadoMantenimientoMaquina(m) {
   if (m.baja === 'Sí') return {estado:'baja', texto:'Baja', clase:'badge-gris', detalle:'Equipo dado de baja', proximo:'—', items:[]};
-  const hoy = isoDate(new Date());
+  const hoy = hoyLocal();
+  const usos = usosMaquina(m);
+  const ultUso = usos.length ? usos[usos.length - 1] : null;
+  if (!ultUso) {
+    return {estado:'sinuso', texto:'Sin uso registrado', clase:'badge-gris', detalle:'Sin uso registrado: no hay mantenimiento exigible (PR-08, por uso)', proximo:'—', items:[]};
+  }
   const plan = MAINT_PLAN[m.categoria] || ['Mensual'];
   const items = plan.map(tipo => {
     const ultimo = ultimoMantenimiento(m, tipo);
-    if (!ultimo) {
-      return {tipo, estado:'vencido', texto:'Sin registro', ultimo:'—', proximo:'Pendiente'};
+    const base = ultimo ? ultimo.fecha : null;
+    const usoPosterior = base ? usos.some(u => u > base) : true;
+    if (!usoPosterior) return {tipo, estado:'sinuso', texto:'Sin uso desde el último', ultimo: base, proximo:'—'};
+    if (MAINT_POR_USO.includes(tipo)) {
+      const primerUso = base ? usos.find(u => u > base) : usos[0];
+      const dias = diffDays(primerUso, hoy);
+      return dias > 0
+        ? {tipo, estado:'vencido', texto:`Pendiente desde ${formatFecha(primerUso)}`, ultimo: base || '—', proximo: primerUso}
+        : {tipo, estado:'alerta', texto:'Pendiente hoy', ultimo: base || '—', proximo: primerUso};
     }
-    const proximo = addDays(ultimo.fecha, MAINT_INTERVALS[tipo]);
+    const intervalo = MAINT_INTERVALS[tipo] || 30;
+    const referencia = base || usos[0];
+    const proximo = addDays(referencia, intervalo);
     const dias = diffDays(hoy, proximo);
     const estado = dias < 0 ? 'vencido' : (dias <= 2 ? 'alerta' : 'ok');
     const texto = dias < 0 ? `Vencido ${Math.abs(dias)} d` : (dias === 0 ? 'Vence hoy' : `En ${dias} d`);
-    return {tipo, estado, texto, ultimo: ultimo.fecha, proximo};
+    return {tipo, estado, texto, ultimo: base || '—', proximo};
   });
   const vencidos = items.filter(i => i.estado === 'vencido').length;
   const alertas = items.filter(i => i.estado === 'alerta').length;
-  if (vencidos) return {estado:'vencido', texto:`${vencidos} vencido${vencidos>1?'s':''}`, clase:'badge-vencido', detalle:items.map(i=>`${i.tipo}: ${i.texto}`).join(' · '), proximo:items.find(i=>i.estado==='vencido')?.proximo || 'Pendiente', items};
-  if (alertas) return {estado:'alerta', texto:`${alertas} próxima${alertas>1?'s':''}`, clase:'badge-alerta', detalle:items.map(i=>`${i.tipo}: ${i.texto}`).join(' · '), proximo:items.find(i=>i.estado==='alerta')?.proximo || '—', items};
-  return {estado:'ok', texto:'Al día', clase:'badge-ok', detalle:items.map(i=>`${i.tipo}: ${i.proximo}`).join(' · '), proximo:items.map(i=>i.proximo).sort()[0] || '—', items};
+  const detalle = items.map(i => i.estado === 'sinuso' ? `${i.tipo}: sin uso desde el último` : `${i.tipo}: ${i.texto}`).join(' · ') + ` · Último uso: ${formatFecha(ultUso)}`;
+  if (vencidos) return {estado:'vencido', texto:`${vencidos} pendiente${vencidos>1?'s':''}`, clase:'badge-vencido', detalle, proximo:items.find(i=>i.estado==='vencido')?.proximo || '—', items};
+  if (alertas) return {estado:'alerta', texto:`${alertas} próxima${alertas>1?'s':''}`, clase:'badge-alerta', detalle, proximo:items.find(i=>i.estado==='alerta')?.proximo || '—', items};
+  if (items.every(i => i.estado === 'sinuso')) return {estado:'sinuso', texto:'Sin uso pendiente', clase:'badge-gris', detalle, proximo:'—', items};
+  return {estado:'ok', texto:'Al día', clase:'badge-ok', detalle, proximo:items.filter(i=>i.proximo!=='—').map(i=>i.proximo).sort()[0] || '—', items};
+}
+
+
+// ============================================================
+// USO DE MAQUINARIA (mantenimiento por uso, PR-08 ap. 5)
+// ============================================================
+function abrirRegistroUso() {
+  document.getElementById('usoFecha').value = hoyLocal();
+  document.getElementById('usoNota').value = '';
+  const cont = document.getElementById('usoListaMaquinas');
+  const cats = ['Desbrozadoras', 'Motosierras', 'Herramientas'];
+  cont.innerHTML = cats.map(cat => {
+    const lista = state.maquinaria.filter(m => m.categoria === cat && m.baja !== 'Sí');
+    if (!lista.length) return '';
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;margin-bottom:4px">
+        <span>${cat}</span>
+        <label style="font-weight:400;font-size:12px;cursor:pointer"><input type="checkbox" onchange="marcarCategoriaUso('${cat}', this.checked)"> Marcar todas</label>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px 14px">
+        ${lista.map(m => `<label style="font-size:13px;cursor:pointer;white-space:nowrap"><input type="checkbox" class="uso-chk" data-cat="${cat}" value="${state.maquinaria.indexOf(m)}"> Nº${m.numero} ${m.marca}</label>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  renderHistorialUso();
+  openModal('modalRegistroUso');
+}
+
+function marcarCategoriaUso(cat, valor) {
+  document.querySelectorAll(`#usoListaMaquinas .uso-chk[data-cat="${cat}"]`).forEach(cb => cb.checked = valor);
+}
+
+function renderHistorialUso() {
+  const cont = document.getElementById('usoHistorial');
+  const ultimos = (state.uso || []).slice().sort((a,b) => (b.timestamp || '').localeCompare(a.timestamp || '')).slice(0, 8);
+  if (!ultimos.length) { cont.innerHTML = '<span style="color:#999">Aún no hay usos registrados.</span>'; return; }
+  cont.innerHTML = ultimos.map(u => `<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid #f0f0f0">
+      <span>${formatFecha(u.fecha)} · ${u.maquina}${u.nota ? ' · ' + u.nota : ''}</span>
+      <button class="btn btn-danger btn-sm" onclick="borrarUso(${u.id})" title="Borrar este registro de uso">🗑</button>
+    </div>`).join('');
+}
+
+function guardarUso() {
+  const fecha = document.getElementById('usoFecha').value;
+  const nota = document.getElementById('usoNota').value.trim();
+  if (!fecha) { toast('⚠️ Introduce la fecha de uso', 'error'); return; }
+  const marcadas = Array.from(document.querySelectorAll('#usoListaMaquinas .uso-chk:checked')).map(cb => Number(cb.value));
+  if (!marcadas.length) { toast('⚠️ Marca al menos una máquina', 'error'); return; }
+  let n = 0;
+  marcadas.forEach((idx, i) => {
+    const m = state.maquinaria[idx];
+    if (!m) return;
+    const label = etiquetaMaquina(m);
+    if (state.uso.some(u => u.fecha === fecha && (u.maquinaId === m.id || u.maquina === label))) return; // ya registrado ese dia
+    state.uso.unshift({
+      id: Date.now() + i,
+      fecha, maquinaId: m.id, maquina: label, categoria: m.categoria, nota,
+      timestamp: new Date().toISOString()
+    });
+    n++;
+  });
+  guardarDatosLocales();
+  closeModal('modalRegistroUso');
+  renderMaquinaria();
+  renderStatsMantenimiento();
+  renderAlertasMantenimiento();
+  toast(n ? `✅ Uso registrado en ${n} máquina${n>1?'s':''}` : 'ℹ️ Ese uso ya estaba registrado', n ? 'success' : 'warning');
+  if (n) syncToSheets('uso');
+}
+
+function borrarUso(id) {
+  if (!confirm('¿Borrar este registro de uso?')) return;
+  state.uso = state.uso.filter(u => u.id !== id);
+  guardarDatosLocales();
+  renderHistorialUso();
+  renderMaquinaria();
+  renderStatsMantenimiento();
+  renderAlertasMantenimiento();
+  syncToSheets('uso');
 }
 
 function resumenAlertasMantenimiento() {
@@ -1901,7 +2053,7 @@ function renderMaquinaria() {
           </td>
           <td class="due-cell">
             <span class="badge ${mant.clase}">${mant.texto}</span>
-            <span class="due-detail">Próx.: ${mant.proximo === 'Pendiente' ? 'pendiente de primer registro' : formatFecha(mant.proximo)}<br>${mant.detalle}</span>
+            <span class="due-detail">${mant.proximo === '—' ? '' : 'Próx.: ' + formatFecha(mant.proximo) + '<br>'}${mant.detalle}</span>
           </td>
           <td>
             ${isBaja ? '' : `
@@ -2165,7 +2317,7 @@ function renderAlertasMantenimiento() {
         <div class="alert-panel-header">
           <div>
             <div class="alert-panel-title">✅ Plan preventivo al día</div>
-            <div style="font-size:13px;color:#567;margin-top:3px">No hay mantenimientos vencidos ni próximos en los próximos 2 días.</div>
+            <div style="font-size:13px;color:#567;margin-top:3px">No hay mantenimientos pendientes: solo se exigen en las máquinas usadas desde su último mantenimiento (PR-08).</div>
           </div>
         </div>
       </div>`;
@@ -2177,7 +2329,7 @@ function renderAlertasMantenimiento() {
       <div class="alert-panel-header">
         <div>
           <div class="alert-panel-title">⚠️ Alertas de mantenimiento preventivo</div>
-          <div style="font-size:13px;color:#7a5b22;margin-top:3px">${vencidos} equipos con mantenimiento vencido · ${alertas.length - vencidos} próximos a vencer</div>
+          <div style="font-size:13px;color:#7a5b22;margin-top:3px">${vencidos} equipos con mantenimiento pendiente · ${alertas.length - vencidos} próximos a vencer</div>
         </div>
         <button class="btn btn-secondary btn-sm" onclick="exportarDatos()">⬇ Backup auditoría</button>
       </div>
@@ -2269,6 +2421,7 @@ async function sincronizarSheets() {
   await syncToSheets('inventario');
   await syncToSheets('maquinaria');
   await syncToSheets('mantenimiento');
+  await syncToSheets('uso');
   await syncMovimientosInventarioPendientes();
   toast('✅ Sincronización completa con Google Sheets');
 }
@@ -2337,6 +2490,7 @@ function importarDatos(event) {
         inventario: data.inventario || [],
         maquinaria: data.maquinaria || [],
         mantenimiento: data.mantenimiento || [],
+        uso: data.uso || [],
         config: data.config || state.config
       };
       guardarDatosLocales();
@@ -2436,7 +2590,7 @@ function toast(msg, type = 'success') {
 }
 
 function formatFecha(str) {
-  if (!str) return '—';
+  if (!str || !/^\d{4}-\d{2}-\d{2}/.test(str)) return '—';
   const d = new Date(str + 'T12:00:00');
   return d.toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
 }
